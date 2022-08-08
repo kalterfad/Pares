@@ -9,7 +9,7 @@ class User(Base):
     id = Column(Integer, primary_key=True)
     username = Column(String, nullable=False)
     is_active = Column(Boolean, default=False, nullable=False)
-    user_id = relationship('ReviewUserLinks', backref='review_links')
+    user_id = relationship('ReviewUserLinks', backref='user_links')
 
 
 class Reviews(Base):

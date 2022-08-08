@@ -16,3 +16,8 @@ def get_db():
         yield db
     finally:
         db.close()
+
+def test():
+    for i in get_db():
+        return i
+

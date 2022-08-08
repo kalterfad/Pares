@@ -1,7 +1,7 @@
 from app.face_control import Controller as control
 
 from app.core.properties import bot
-
+from app.crud import create_user
 
 @bot.message_handler(commands=['start'])
 @control('ban')
@@ -11,3 +11,8 @@ def send_welcome(message):
                      'Привет, {0.first_name}, '
                      'Выбери команду для продолжения или напиши /help.'.
                      format(message.from_user, bot.get_me()), parse_mode='html')
+
+
+
+if __name__ == '__main__':
+    bot.polling(none_stop=True)
