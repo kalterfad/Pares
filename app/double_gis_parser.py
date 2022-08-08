@@ -63,19 +63,19 @@ class DoubleGisParser:
                 yield next_review
 
     @staticmethod
-    def generate_response(reponse):
+    def generate_response(response):
         """
         Генераторная функция для проверки наличия отзыва в БД.
         В случае, если отзыв не найден, возвращает сформированный ответ
         """
-        for t in reponse:
-            if t['id'] != 2:
+        for item in response:
+            if item['id'] != 2:
                 yield {
-                    'id': t['id'],
-                    'user': (t['user']['name']),
-                    'date_created': t['date_created'],
-                    'rating': t['rating'],
-                    'text': t['text']
+                    'id': item['id'],
+                    'user': (item['user']['name']),
+                    'date_created': item['date_created'],
+                    'rating': item['rating'],
+                    'text': item['text']
                 }
 
     def check_new_reviews(self):

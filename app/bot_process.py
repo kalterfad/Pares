@@ -1,10 +1,16 @@
+from app.crud import add_new_review, get_user_data, get_all_users
+from app.double_gis_parser import DoubleGisParser
 from app.flamp_parser import FlampParser
-from app.crud import add_new_review, get_user_data
-from app.schemas import ReviewBase, UserBase
+from app.schemas import ReviewBase
 
 
-def get_reviews():
-    flamp = FlampParser().get_reviews()
+def get_reviews(api):
+    user_list = get_all_users()
+
+    for review in api():
+        for user in user_list:
+            send_review(user.id, review)
+            # save_review(ReviewBase(**review))
 
 
 def save_review(review: ReviewBase):
@@ -13,7 +19,7 @@ def save_review(review: ReviewBase):
 
 def get_current_user(func):
     def inner(*args, **kwargs):
-        user = get_user_data(kwargs['chat_id'])
+        user = get_user_data(args[0])
         if user.is_active:
             return func(*args, **kwargs)
 
@@ -21,14 +27,9 @@ def get_current_user(func):
 
 
 @get_current_user
-def send_review(chat_id, name, test):
-    print(chat_id)
-
-
-
-
-
+def send_review(chat_id: int, review):
+    print(f'{chat_id}\n{review}')
 
 
 if __name__ == '__main__':
-    send_review(chat_id=12314124, name='ftira', test=12)
+    get_reviews(DoubleGisParser().collect_result)

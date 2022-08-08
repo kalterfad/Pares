@@ -36,6 +36,7 @@ def get_review(review_id: int, db: Session = test()) -> ReviewBase:
 
 def add_new_review(review: ReviewBase, db: Session = test()):
     new_review = Reviews(
+        id=review.id,
         user=review.user,
         date_created=review.date_created,
         rating=review.rating,
