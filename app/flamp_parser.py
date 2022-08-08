@@ -23,7 +23,7 @@ class FlampParser:
         self.REVIEWS_URL = 'https://flamp.ru/api/2.0/filials/{place_id}/reviews?limit=50&is_trusted=true'
 
 
-    def get_reviews(self):
+    def get_reviews(self) -> list:
         response = []
 
         for address in self.addresses:
@@ -32,8 +32,7 @@ class FlampParser:
         return response
 
 
-    def collect_result(self):
-
+    def collect_result(self) -> list:
         reviews = []
 
         response = self.get_reviews()
@@ -49,7 +48,7 @@ class FlampParser:
         return reviews
 
 
-    def get_username(self, user_id):
+    def get_username(self, user_id: str):
         return requests.get(user_id, headers=self.headers).json()['user']['name']
 
 

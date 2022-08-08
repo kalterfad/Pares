@@ -17,3 +17,5 @@ REDIS_BACKEND = f'redis://:{REDIS_PASSWORD}@{REDIS_HOST}:{REDIS_PORT}/0'
 
 # Ключ доступа к API
 FLAMP_API_KEY = 'Bearer 2b93f266f6a4df2bb7a196bb76dca60181ea3b37'
+
+DOUBLE_GIS_API_KEY = '37c04fe6-a560-4549-b459-02309cf643ad&locale'
