@@ -1,6 +1,6 @@
 from sqlalchemy import Column, String, Integer, Boolean, ForeignKey
 from sqlalchemy.orm import relationship
-from app.core.database import Base
+from app.core.database import Base, engine, metadata
 
 
 class User(Base):
@@ -22,9 +22,13 @@ class Reviews(Base):
     text = Column(String, nullable=False)
     review_id = relationship('ReviewUserLinks', backref='review_links')
 
+
 class ReviewUserLinks(Base):
-    _tablename__ = 'review_user_link'
+    __tablename__ = 'review_user_link'
 
     id = Column(String, primary_key=True)
     user_id = Column(Integer, ForeignKey('user.id'), nullable=False)
     review_id = Column(Integer, ForeignKey('review.id'), nullable=False)
+
+if __name__ == '__main__':
+    Base.metadata.create_all(engine)
