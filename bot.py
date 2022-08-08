@@ -1,6 +1,6 @@
-from controller.face_control import Controller as control
+from app.face_control import Controller as control
 
-from core.properties import bot
+from app.core.properties import bot
 
 
 @bot.message_handler(commands=['start'])

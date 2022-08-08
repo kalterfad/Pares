@@ -1,6 +1,6 @@
 from celery.schedules import crontab
 
-from celery_conf.celery import app
+from app.celery_conf.celery import app
 
 @app
 def update_reviews():

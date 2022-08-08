@@ -1,5 +1,5 @@
 from celery import Celery
-from core.properties import REDIS_BROKER, REDIS_BACKEND
+from app.core.properties import REDIS_BROKER, REDIS_BACKEND
 
 app = Celery(
     'background_parser',

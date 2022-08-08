@@ -1,6 +1,6 @@
 import requests
 
-from core.properties import FLAMP_API_KEY
+from app.core.properties import FLAMP_API_KEY
 
 
 class FlampParser:
