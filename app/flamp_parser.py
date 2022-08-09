@@ -1,6 +1,8 @@
 import requests
 
 from app.core.properties import FLAMP_API_KEY
+from app.crud import get_reviews_count, update_reviews_count, get_review
+from app.schemas import ReviewsCount
 
 
 class FlampParser:
@@ -23,14 +25,19 @@ class FlampParser:
         self.REVIEWS_URL = 'https://flamp.ru/api/2.0/filials/{place_id}/reviews?limit=5'
         self.REVIEW_COUNT_URL = 'https://flamp.ru/api/2.0/filials/{place_id}'
 
-    def get_reviews(self, link) -> list:
+    def get_reviews(self, link):
 
         for address in self.addresses:
-            yield requests.get(link.format(place_id=address), headers=self.headers).json()
+            yield requests.get(link.format(place_id=address), headers=self.headers).json(), address
 
     def generate_response(self, response):
+        """
+       Генераторная функция для проверки наличия отзыва в БД.
+       В случае, если отзыв не найден, возвращает сформированный ответ
+       """
         for item in response:
-            if item['id'] != 2:
+
+            if item['id'] != get_review(item['id']).id:
                 yield {
                     'id': item['id'],
                     'user': str(self.get_username(item['user'])),
@@ -39,15 +46,15 @@ class FlampParser:
                     'text': item['text']
                 }
 
-    def collect_result(self):
+    def collect_result(self, review_link):
 
-        for response in self.get_reviews(self.REVIEWS_URL):
+        for response in self.get_reviews(review_link):
 
-            for formed_response in self.generate_response(response['reviews']):
+            for formed_response in self.generate_response(response[0]['reviews']):
                 if formed_response is not None:
                     yield formed_response
 
-            for next_review in self.get_next_reviews(response):
+            for next_review in self.get_next_reviews(response[0]):
                 yield next_review
 
     def get_next_reviews(self, response):
@@ -69,16 +76,31 @@ class FlampParser:
         return requests.get(user_id, headers=self.headers).json()['user']['name']
 
     def check_new_reviews(self):
-
+        """
+        Проверка на появление новых отзывов
+        В случае если появился новый отзыв, нужно запускать метод парсинга отзывов
+        """
         for review in self.get_reviews(self.REVIEW_COUNT_URL):
-            # if review['filial']['reviews_count']:
-            print(review['filial']['reviews_count'])
+
+            count = get_reviews_count('flamp', place=ReviewsCount(**{
+                'place_id': review[0]['filial']['id'],
+                'reviews_count': review[0]['filial']['reviews_count']
+            }))
+
+            if count.reviews_count != review[0]['filial']['reviews_count']:
+                update_reviews_count('flamp', ReviewsCount(**{
+                    'place_id': review[0]['filial']['id'],
+                    'reviews_count': review[0]['filial']['reviews_count']
+                }))
+
+                for collect_result in self.collect_result(self.REVIEWS_URL):
+                    yield collect_result
+
 
 
 if __name__ == '__main__':
-    c = 0
-    for i in FlampParser().collect_result():
-        print(i)
-        c += 1
 
-    print(c)
+    c = 0
+    FlampParser().check_new_reviews()
+
+

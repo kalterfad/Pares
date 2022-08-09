@@ -1,8 +1,8 @@
 from sqlalchemy.orm import Session
 
 from app.core.database import test
-from app.models import User, Reviews, ReviewUserLinks
-from app.schemas import UserBase, ReviewBase, ReviewUserLinkBase
+from app.models import User, Reviews, ReviewUserLinks, FlampReviewCount, DoubleGisReviewCount
+from app.schemas import UserBase, ReviewBase, ReviewUserLinkBase, ReviewsCount
 
 
 def get_user_data(chat_id: int, db: Session = test()) -> UserBase:
@@ -30,8 +30,17 @@ def create_user(user: UserBase, db: Session = test()):
     return new_user
 
 
-def get_review(review_id: int, db: Session = test()) -> ReviewBase:
-    return ReviewBase(**db.query(Reviews).filter(Reviews.id == review_id).first().__dict__)
+def get_review(review_id: int, db: Session = test()):
+
+    review = db.query(Reviews).filter(Reviews.id == review_id).first()
+    if review is None:
+    # если объект не найден, значит фолс. если фолс. значит продолжаем работу
+        return ReviewBase()
+    else:
+        # если объект найден, значит тру и работу продолжать нельзя
+        return ReviewBase(**review.__dict__)
+
+
 
 
 def add_new_review(review: ReviewBase, db: Session = test()):
@@ -64,6 +73,43 @@ def create_new_review_link(review_link: ReviewUserLinkBase, db: Session = test()
     db.refresh(new_review_link)
 
     return new_review_link
+
+
+def get_reviews_count(model: str, place: ReviewsCount, db: Session = test()):
+
+    db_model = {
+        'flamp': FlampReviewCount,
+        'doublegis': DoubleGisReviewCount
+    }
+
+    reviews_count = db.query(db_model[model]).filter(db_model[model].place_id == place.place_id).first()
+    if reviews_count is None:
+
+        new_place = db_model[model](
+            place_id=place.place_id,
+            reviews_count=place.reviews_count
+        )
+        db.add(new_place)
+        db.commit()
+        db.refresh(new_place)
+
+        return new_place
+    else:
+        return reviews_count
+
+
+def update_reviews_count(model: str, update_place: ReviewsCount, db: Session = test()):
+    db_model = {
+        'flamp': FlampReviewCount,
+        'doublegis': DoubleGisReviewCount
+    }
+    db.query(db_model[model]).filter(db_model[model].place_id==update_place.place_id).update(
+        {'reviews_count': update_place.reviews_count})
+
+    db.commit()
+
+
+
 
 
 if __name__ == '__main__':

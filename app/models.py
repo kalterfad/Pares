@@ -1,4 +1,4 @@
-from sqlalchemy import Column, String, Integer, Boolean, ForeignKey
+from sqlalchemy import Column, String, Integer, Boolean, ForeignKey, Identity
 from sqlalchemy.orm import relationship
 from app.core.database import Base, engine, metadata
 
@@ -29,6 +29,23 @@ class ReviewUserLinks(Base):
     id = Column(String, primary_key=True)
     user_id = Column(Integer, ForeignKey('user.id'), nullable=False)
     review_id = Column(Integer, ForeignKey('review.id'), nullable=False)
+
+
+class DoubleGisReviewCount(Base):
+    __tablename__ = 'double_gis_review_count'
+
+    id = Column(Integer, primary_key=True)
+    place_id = Column(String, nullable=False)
+    reviews_count = Column(Integer, nullable=False)
+
+
+class FlampReviewCount(Base):
+    __tablename__ = 'flamp_review_count'
+
+    id = Column(Integer, primary_key=True)
+    place_id = Column(String, nullable=False)
+    reviews_count = Column(Integer, nullable=False)
+
 
 if __name__ == '__main__':
     Base.metadata.create_all(engine)

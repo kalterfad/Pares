@@ -2,15 +2,25 @@ from app.crud import add_new_review, get_user_data, get_all_users
 from app.double_gis_parser import DoubleGisParser
 from app.flamp_parser import FlampParser
 from app.schemas import ReviewBase
+from datetime import datetime
+
+def wrapper(func):
+    def inner(*args, **kwargs):
+        now = datetime.now()
+        result = func(*args, **kwargs)
+        print('Времени прошло', datetime.now() - now)
+        return result
+    return inner
 
 
+@wrapper
 def get_reviews(api):
     user_list = get_all_users()
 
     for review in api():
+        save_review(ReviewBase(**review))
         for user in user_list:
             send_review(user.id, review)
-            # save_review(ReviewBase(**review))
 
 
 def save_review(review: ReviewBase):
@@ -32,4 +42,4 @@ def send_review(chat_id: int, review):
 
 
 if __name__ == '__main__':
-    get_reviews(DoubleGisParser().collect_result)
+    get_reviews(FlampParser().check_new_reviews)
