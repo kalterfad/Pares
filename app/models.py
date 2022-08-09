@@ -9,6 +9,7 @@ class User(Base):
     id = Column(Integer, primary_key=True)
     username = Column(String, nullable=False)
     is_active = Column(Boolean, default=False, nullable=False)
+    is_superuser = Column(Boolean, default=False, nullable=True)
     user_id = relationship('ReviewUserLinks', backref='user_links')
 
 

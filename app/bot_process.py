@@ -1,8 +1,9 @@
-from app.crud import add_new_review, get_user_data, get_all_users
-from app.double_gis_parser import DoubleGisParser
-from app.flamp_parser import FlampParser
-from app.schemas import ReviewBase
 from datetime import datetime
+
+from app.crud import add_new_review, get_user_data, get_all_users
+from app.flamp_parser import FlampParser
+from app.schemas import ReviewBase, UserBase
+
 
 def wrapper(func):
     def inner(*args, **kwargs):
@@ -10,6 +11,7 @@ def wrapper(func):
         result = func(*args, **kwargs)
         print('Времени прошло', datetime.now() - now)
         return result
+
     return inner
 
 
@@ -25,6 +27,10 @@ def get_reviews(api):
 
 def save_review(review: ReviewBase):
     add_new_review(review)
+
+
+def create_new_user(user: UserBase):
+    get_user_data(user)
 
 
 def get_current_user(func):

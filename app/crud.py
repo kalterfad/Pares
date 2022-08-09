@@ -5,16 +5,38 @@ from app.models import User, Reviews, ReviewUserLinks, FlampReviewCount, DoubleG
 from app.schemas import UserBase, ReviewBase, ReviewUserLinkBase, ReviewsCount
 
 
-def get_user_data(chat_id: int, db: Session = test()) -> UserBase:
-    return UserBase(**db.query(User).filter(User.id == chat_id).first().__dict__)
-
-
 def get_all_users(db: Session = test()):
     user_list = []
     for i in db.query(User).all():
         user_list.append(UserBase(**i.__dict__))
 
     return user_list
+
+
+def get_user_data(user: UserBase, db: Session = test()) -> UserBase:
+
+    user_data = db.query(User).filter(User.id == user.id).first()
+    if user_data is None:
+        new_user = User(
+            id=user.id,
+            username=user.username,
+            is_active=user.is_active
+        )
+        db.add(new_user)
+        db.commit()
+        db.refresh(new_user)
+
+        return new_user
+    else:
+        return UserBase(**user_data.__dict__)
+
+
+def update_user_data(chat_id: int, update_data: dict, db: Session = test()):
+    db.query(User).filter(User.id == chat_id).update(
+        update_data
+    )
+
+    db.commit()
 
 
 def create_user(user: UserBase, db: Session = test()):
@@ -34,13 +56,9 @@ def get_review(review_id: int, db: Session = test()):
 
     review = db.query(Reviews).filter(Reviews.id == review_id).first()
     if review is None:
-    # если объект не найден, значит фолс. если фолс. значит продолжаем работу
         return ReviewBase()
     else:
-        # если объект найден, значит тру и работу продолжать нельзя
         return ReviewBase(**review.__dict__)
-
-
 
 
 def add_new_review(review: ReviewBase, db: Session = test()):

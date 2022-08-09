@@ -78,7 +78,7 @@ class FlampParser:
     def check_new_reviews(self):
         """
         Проверка на появление новых отзывов
-        В случае если появился новый отзыв, нужно запускать метод парсинга отзывов
+        В случае если появился новый отзыв, запускает метод сбора отзывов
         """
         for review in self.get_reviews(self.REVIEW_COUNT_URL):
 

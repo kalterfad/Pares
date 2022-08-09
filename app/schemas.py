@@ -6,6 +6,7 @@ class UserBase(BaseModel):
     id: int
     username: str
     is_active: bool
+    is_superuser: bool
 
     class Config:
         orm_mode = True
