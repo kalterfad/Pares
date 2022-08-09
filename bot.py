@@ -41,7 +41,7 @@ def send_admin_message(message):
     # Кидаем запрос на получение айди всех админов, после чего рассылаем сообщения
     # all_users = get_all_users()
 
-    bot.send_message(446777294, text=text, parse_mode='html', reply_markup=markup)
+    bot.send_message(-1001751207146, text=text, parse_mode='html', reply_markup=markup)
 
 
 @bot.callback_query_handler(func=lambda call: call.data[:3] == 'is_')
@@ -68,13 +68,15 @@ def issue_rights(call):
             'message': f'Пользователь: {chat_id}\n\n<b>{action_dict[selected_action[0]["text"]][1]}</b>',
             'active': action_dict[selected_action[0]['text']][0],
             'superuser': selected_action[1]['text'],
-            'action': selected_action[0]["text"]
+            'action': selected_action[0]["text"],
+            'message_to_user': 'Администратор активировал ваш аккаунт.'
         },
         'is_superuser': {
             'message': f'Пользователь: {chat_id}\n\n<b>{action_dict[selected_action[1]["text"]][1]}</b>',
             'active': selected_action[0]['text'],
             'superuser': action_dict[selected_action[1]['text']][0],
-            'action': selected_action[1]["text"]
+            'action': selected_action[1]["text"],
+            'message_to_user': 'Вам выданы права администратора\n\n<a href = "https://t.me/+kq4hv0AQDTdkNmUy">Ссылка на группу</a>'
         }
     }
 
@@ -82,9 +84,21 @@ def issue_rights(call):
     bot.answer_callback_query(call.id, 'Успешно', show_alert=False)
 
     markup = Keyboard(chat_id, right_dict[action]['active'], right_dict[action]['superuser']).user_right_keyboard()
-    bot.edit_message_text(right_dict[action]['message'], call.from_user.id, call.message.message_id, parse_mode='html',
+    bot.edit_message_text(right_dict[action]['message'], -1001751207146, call.message.message_id, parse_mode='html',
                           reply_markup=markup)
 
+    if action_dict[right_dict[action]['action']][2]:
+        text = right_dict[action]['message_to_user']
+        if action == 'is_superuser':
+            bot.send_message(chat_id, text, parse_mode='html')
+        bot.unban_chat_member(-1001751207146, chat_id)
+    elif action == 'is_superuser' and not action_dict[right_dict[action]['action']][2]:
+        bot.ban_chat_member(-1001751207146, chat_id)
+
+
+@bot.message_handler(content_types=['text'])
+def test(message):
+    print(message.chat.id)
 
 if __name__ == '__main__':
     bot.polling(none_stop=True)
