@@ -38,6 +38,7 @@ def send_admin_message(message):
         is_active_actions='Активировать',
         is_superuser_actions='Дать права администратора').user_right_keyboard()
 
+    # Отсылаем сообщение в админ группу
     bot.send_message(-1001751207146, text=text, parse_mode='html', reply_markup=markup)
 
 

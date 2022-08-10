@@ -1,8 +1,3 @@
-import sys
-
-sys.path = ['', '..'] + sys.path[1:]
-# sys.path.append('C:\\Users\\ftira\\Documents\\AllProjects\\TestParser\\app')
-print(sys.path)
 from sqlalchemy import Column, String, Integer, Boolean, ForeignKey
 from sqlalchemy.orm import relationship
 from app.core.database import Base, engine, metadata

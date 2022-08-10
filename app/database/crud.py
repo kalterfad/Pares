@@ -1,6 +1,3 @@
-import sys
-
-sys.path = ['', '..'] + sys.path[1:]
 from sqlalchemy.orm import Session
 
 from app.core.database import test

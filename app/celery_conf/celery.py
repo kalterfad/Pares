@@ -1,5 +1,6 @@
-from celery import Celery
 from app.core.properties import REDIS_BROKER, REDIS_BACKEND
+
+from celery import Celery
 
 app = Celery(
     'celery_conf',
@@ -19,4 +20,4 @@ app.conf.update(
 app.autodiscover_tasks()
 
 if __name__ == '__main__':
-    app.start()
+    print(REDIS_BROKER, REDIS_BACKEND)

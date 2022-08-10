@@ -1,6 +1,3 @@
-import sys
-
-sys.path = ['', '..'] + sys.path[1:]
 import re
 from datetime import datetime
 
