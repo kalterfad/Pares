@@ -1,7 +1,11 @@
-from sqlalchemy import Column, String, Integer, Boolean, ForeignKey, Identity
+import sys
+
+sys.path = ['', '..'] + sys.path[1:]
+# sys.path.append('C:\\Users\\ftira\\Documents\\AllProjects\\TestParser\\app')
+print(sys.path)
+from sqlalchemy import Column, String, Integer, Boolean, ForeignKey
 from sqlalchemy.orm import relationship
 from app.core.database import Base, engine, metadata
-
 
 class User(Base):
     __tablename__ = 'user'
@@ -49,5 +53,5 @@ class FlampReviewCount(Base):
     reviews_count = Column(Integer, nullable=False)
 
 
-if __name__ == '__main__':
-    Base.metadata.create_all(engine)
+# if __name__ == '__main__':
+#     Base.metadata.create_all(engine)

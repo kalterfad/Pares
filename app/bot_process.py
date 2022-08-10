@@ -1,9 +1,13 @@
+import sys
+
+sys.path = ['', '..'] + sys.path[1:]
 import re
 from datetime import datetime
 
+import telebot
+
 from app.core.properties import bot
 from app.database.crud import add_new_review, get_user_data, get_all_users
-from app.parser.flamp_parser import FlampParser
 from app.parser.double_gis_parser import DoubleGisParser
 from app.database.schemas import ReviewBase, UserBase
 
@@ -25,8 +29,8 @@ def get_reviews(api):
     for review in api():
         save_review(ReviewBase(**review))
         print(ReviewBase(**review).website)
-        # for user in user_list:
-        #     send_review(user.id, ReviewBase(**review))
+        for user in user_list:
+            send_review(user.id, ReviewBase(**review))
 
 
 def save_review(review: ReviewBase):
@@ -60,10 +64,7 @@ def send_review(chat_id: int, review: ReviewBase):
               f'<b>Отзыв</b>: {review.text}'
     try:
         bot.send_message(chat_id, message, parse_mode='html', disable_web_page_preview=True)
-    except Exception as e:
-        print(e)
+    except telebot.apihelper.ApiException:
+        pass
+
     print(review)
-
-
-if __name__ == '__main__':
-    get_reviews(DoubleGisParser().check_new_reviews)

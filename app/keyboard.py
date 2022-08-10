@@ -21,5 +21,3 @@ class Keyboard:
 
         return Keyboa(items=executor_button).keyboard
 
-if __name__ == '__main__':
-    print('is_superuser'[:3])

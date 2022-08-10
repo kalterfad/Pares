@@ -1,3 +1,6 @@
+import sys
+
+sys.path = ['', '..'] + sys.path[1:]
 from sqlalchemy.orm import Session
 
 from app.core.database import test
@@ -161,5 +164,5 @@ def delete_review(db: Session = test()):
     db.commit()
 
 
-if __name__ == '__main__':
-    delete_review()
+# if __name__ == '__main__':
+#     delete_review()

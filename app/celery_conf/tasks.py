@@ -1,31 +1,28 @@
-import telebot
 from celery.schedules import crontab
 
 from app.bot_process import get_reviews
 from app.celery_conf.celery import app
-from app.core.properties import bot
 from app.parser.flamp_parser import FlampParser
 from app.parser.double_gis_parser import DoubleGisParser
 
 
 @app
-def update_reviews():
-    a = FlampParser().check_new_reviews
-    b = DoubleGisParser().check_new_reviews
-    get_reviews()
+def update_reviews_from_flamp():
+    get_reviews(FlampParser().check_new_reviews)
 
 
-def try_send_message(chat_id, message, keyboard=None):
-    try:
-        bot.send_message(chat_id, message, parse_mode='html')
-    except telebot.apihelper.ApiException:
-        pass
-        # process.delete_user(chat_id)
+@app
+def update_reviews_from_double_gis():
+    get_reviews(DoubleGisParser().check_new_reviews)
 
 
 app.conf.beat_schedule = {
-    'update_reviews': {
-        'task': 'app.celery_conf.tasks.update_reviews',
-        'schedule': crontab(minute=0, hour=0, day_of_week='mon,tue,wed,thu,fri,sat'),
+    'update_reviews_from_flamp': {
+        'task': 'app.celery_conf.tasks.update_reviews_from_flamp',
+        'schedule': crontab(minute=0, hour=0),
+    },
+    'update_reviews_from_double_gis': {
+            'task': 'app.celery_conf.tasks.update_reviews_from_double_gis',
+            'schedule': crontab(minute=0, hour=0),
     }
 }
