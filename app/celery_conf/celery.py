@@ -2,7 +2,7 @@ from celery import Celery
 from app.core.properties import REDIS_BROKER, REDIS_BACKEND
 
 app = Celery(
-    'background_parser',
+    'celery_conf',
     broker=REDIS_BROKER,
     backend=REDIS_BACKEND,
     include=['celery_conf.tasks']
