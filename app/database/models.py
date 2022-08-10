@@ -21,6 +21,7 @@ class Reviews(Base):
     date_created = Column(String, nullable=False)
     rating = Column(Integer, nullable=False)
     text = Column(String, nullable=False)
+    website = Column(String, nullable=False)
     review_id = relationship('ReviewUserLinks', backref='review_links')
 
 

@@ -1,8 +1,8 @@
 from sqlalchemy.orm import Session
 
 from app.core.database import test
-from app.models import User, Reviews, ReviewUserLinks, FlampReviewCount, DoubleGisReviewCount
-from app.schemas import UserBase, ReviewBase, ReviewUserLinkBase, ReviewsCount
+from app.database.models import User, Reviews, ReviewUserLinks, FlampReviewCount, DoubleGisReviewCount
+from app.database.schemas import UserBase, ReviewBase, ReviewUserLinkBase, ReviewsCount
 
 
 def get_all_users(db: Session = test()):
@@ -67,13 +67,17 @@ def add_new_review(review: ReviewBase, db: Session = test()):
         user=review.user,
         date_created=review.date_created,
         rating=review.rating,
-        text=review.text
+        text=review.text,
+        website=review.website
     )
     db.add(new_review)
     db.commit()
     db.refresh(new_review)
 
     return new_review
+
+
+
 
 
 def get_review_link(link_id: str, db: Session = test()) -> ReviewUserLinkBase:
@@ -103,17 +107,25 @@ def get_reviews_count(model: str, place: ReviewsCount, db: Session = test()):
     reviews_count = db.query(db_model[model]).filter(db_model[model].place_id == place.place_id).first()
     if reviews_count is None:
 
-        new_place = db_model[model](
-            place_id=place.place_id,
-            reviews_count=place.reviews_count
-        )
-        db.add(new_place)
-        db.commit()
-        db.refresh(new_place)
-
-        return new_place
+        return ReviewsCount()
     else:
         return reviews_count
+
+def add_reviews_count(model: str, place: ReviewsCount, db: Session = test()):
+    db_model = {
+        'flamp': FlampReviewCount,
+        'doublegis': DoubleGisReviewCount
+    }
+
+    new_place = db_model[model](
+        place_id=place.place_id,
+        reviews_count=place.reviews_count
+    )
+    db.add(new_place)
+    db.commit()
+    db.refresh(new_place)
+
+    return new_place
 
 
 def update_reviews_count(model: str, update_place: ReviewsCount, db: Session = test()):
@@ -121,14 +133,33 @@ def update_reviews_count(model: str, update_place: ReviewsCount, db: Session = t
         'flamp': FlampReviewCount,
         'doublegis': DoubleGisReviewCount
     }
-    db.query(db_model[model]).filter(db_model[model].place_id==update_place.place_id).update(
-        {'reviews_count': update_place.reviews_count})
+    reviews_count = db.query(db_model[model]).filter(db_model[model].place_id == update_place.place_id).first()
+    if reviews_count is None:
 
+        new_place = db_model[model](
+            place_id=update_place.place_id,
+            reviews_count=update_place.reviews_count
+        )
+        db.add(new_place)
+        db.commit()
+        db.refresh(new_place)
+
+        return new_place
+
+    else:
+        db.query(db_model[model]).filter(db_model[model].place_id==update_place.place_id).update(
+            {'reviews_count': update_place.reviews_count})
+
+        db.commit()
+
+
+def delete_review(db: Session = test()):
+    # flamp_review_count
+    # review
+    query = 'DELETE FROM flamp_review_count'
+    db.execute(query)
     db.commit()
 
 
-
-
-
 if __name__ == '__main__':
-    pass
+    delete_review()

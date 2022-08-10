@@ -1,8 +1,9 @@
+import pyshorteners
 import requests
 
 from app.core.properties import FLAMP_API_KEY
-from app.crud import get_reviews_count, update_reviews_count, get_review
-from app.schemas import ReviewsCount
+from app.database.crud import get_reviews_count, update_reviews_count, get_review, add_reviews_count
+from app.database.schemas import ReviewsCount
 
 
 class FlampParser:
@@ -24,10 +25,11 @@ class FlampParser:
 
         self.REVIEWS_URL = 'https://flamp.ru/api/2.0/filials/{place_id}/reviews?limit=5'
         self.REVIEW_COUNT_URL = 'https://flamp.ru/api/2.0/filials/{place_id}'
+        self.link_to_review = ''
 
-    def get_reviews(self, link):
+    def get_reviews(self, link, place_id):
 
-        for address in self.addresses:
+        for address in place_id:
             yield requests.get(link.format(place_id=address), headers=self.headers).json(), address
 
     def generate_response(self, response):
@@ -35,6 +37,7 @@ class FlampParser:
        Генераторная функция для проверки наличия отзыва в БД.
        В случае, если отзыв не найден, возвращает сформированный ответ
        """
+        short = pyshorteners.Shortener()
         for item in response:
 
             if item['id'] != get_review(item['id']).id:
@@ -43,12 +46,13 @@ class FlampParser:
                     'user': str(self.get_username(item['user'])),
                     'date_created': item['date_created'],
                     'rating': item['rating'],
-                    'text': item['text']
+                    'text': item['text'],
+                    'website': short.tinyurl.short(self.link_to_review)
                 }
 
-    def collect_result(self, review_link):
+    def collect_result(self, review_link, place_id):
 
-        for response in self.get_reviews(review_link):
+        for response in self.get_reviews(review_link, place_id):
 
             for formed_response in self.generate_response(response[0]['reviews']):
                 if formed_response is not None:
@@ -80,27 +84,26 @@ class FlampParser:
         Проверка на появление новых отзывов
         В случае если появился новый отзыв, запускает метод сбора отзывов
         """
-        for review in self.get_reviews(self.REVIEW_COUNT_URL):
+        for review in self.get_reviews(self.REVIEW_COUNT_URL, self.addresses):
 
             count = get_reviews_count('flamp', place=ReviewsCount(**{
                 'place_id': review[0]['filial']['id'],
                 'reviews_count': review[0]['filial']['reviews_count']
             }))
 
-            if count.reviews_count != review[0]['filial']['reviews_count']:
+            if count.reviews_count == 0:
+                add_reviews_count('flamp', ReviewsCount(**{
+                    'place_id': review[0]['filial']['id'],
+                    'reviews_count': review[0]['filial']['reviews_count']
+                }))
+
+            elif count.reviews_count != review[0]['filial']['reviews_count']:
                 update_reviews_count('flamp', ReviewsCount(**{
                     'place_id': review[0]['filial']['id'],
                     'reviews_count': review[0]['filial']['reviews_count']
                 }))
 
-                for collect_result in self.collect_result(self.REVIEWS_URL):
-                    yield collect_result
-
-
-
-if __name__ == '__main__':
-
-    c = 0
-    FlampParser().check_new_reviews()
-
-
+            self.link_to_review = f'https://ufa.flamp.ru/firm/vkusno_i_tochka-{review[1]}'
+            print(1)
+            for collect_result in self.collect_result(self.REVIEWS_URL, [review[0]['filial']['id'], ]):
+                yield collect_result

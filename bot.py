@@ -2,10 +2,10 @@ import re
 
 from app.bot_process import create_new_user
 from app.core.properties import bot
-from app.crud import update_user_data
+from app.database.crud import update_user_data
 from app.face_control import Controller as control
 from app.keyboard import Keyboard
-from app.schemas import UserBase
+from app.database.schemas import UserBase
 
 
 @bot.message_handler(commands=['start'])
@@ -37,9 +37,6 @@ def send_admin_message(message):
         message.chat.id,
         is_active_actions='Активировать',
         is_superuser_actions='Дать права администратора').user_right_keyboard()
-
-    # Кидаем запрос на получение айди всех админов, после чего рассылаем сообщения
-    # all_users = get_all_users()
 
     bot.send_message(-1001751207146, text=text, parse_mode='html', reply_markup=markup)
 
@@ -89,12 +86,11 @@ def issue_rights(call):
 
     if action_dict[right_dict[action]['action']][2]:
         text = right_dict[action]['message_to_user']
+        bot.send_message(chat_id, text, parse_mode='html')
         if action == 'is_superuser':
-            bot.send_message(chat_id, text, parse_mode='html')
-        bot.unban_chat_member(-1001751207146, chat_id)
+            bot.unban_chat_member(-1001751207146, chat_id)
     elif action == 'is_superuser' and not action_dict[right_dict[action]['action']][2]:
         bot.ban_chat_member(-1001751207146, chat_id)
-
 
 @bot.message_handler(content_types=['text'])
 def test(message):

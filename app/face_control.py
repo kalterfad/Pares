@@ -6,8 +6,8 @@ class Controller:
         self.list_name = list_name
 
         self.dict_id = {
-            'ban': [],
-            'admin': ['446777294']
+            'ban': [-1001751207146],
+            'admin': [446777294]
         }
 
         self.checking_case = {
@@ -28,7 +28,7 @@ class Controller:
 
 
     def checking_ban_list(self, message, id_dict):
-        if str(message.chat.id) not in self.dict_id[id_dict]:
+        if message.chat.id not in self.dict_id[id_dict]:
             return True
         else:
             return False

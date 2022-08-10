@@ -1,8 +1,9 @@
+import pyshorteners
 import requests
 
 from app.core.properties import DOUBLE_GIS_API_KEY
-from app.crud import get_reviews_count, update_reviews_count, get_review
-from app.schemas import ReviewsCount
+from app.database.crud import get_reviews_count, update_reviews_count, get_review, add_reviews_count
+from app.database.schemas import ReviewsCount
 
 
 class DoubleGisParser:
@@ -29,6 +30,7 @@ class DoubleGisParser:
                           '70000001044506651', '70000001023134221', '70000001021885495']
 
         self.DOUBLE_GIS_URL = 'https://public-api.reviews.2gis.com/2.0/branches/{place_id}/reviews?limit=50&is_advertiser=false&fields=meta.providers,meta.branch_rating,meta.branch_reviews_count,meta.total_count,reviews.hiding_reason,reviews.is_verified&without_my_first_review=false&rated=true&sort_by=date_edited&key={APIKEY}&locale=ru_RU'
+        self.link_to_review = ''
 
     def get_reviews(self):
         """
@@ -58,7 +60,6 @@ class DoubleGisParser:
     def collect_result(self, reviews):
         """Главная генераторная функция, целью которой является генерация одного отзыва и последующей отправки пользователям"""
 
-
         for formed_response in self.generate_response(reviews['reviews']):
             if formed_response is not None:
                 yield formed_response
@@ -66,12 +67,12 @@ class DoubleGisParser:
         for next_review in self.get_next_reviews(reviews):
             yield next_review
 
-    @staticmethod
-    def generate_response(response):
+    def generate_response(self, response):
         """
         Генераторная функция для проверки наличия отзыва в БД.
         В случае, если отзыв не найден, возвращает сформированный ответ
         """
+        short = pyshorteners.Shortener()
         for item in response:
 
             if item['id'] != str(get_review(item['id']).id):
@@ -80,7 +81,8 @@ class DoubleGisParser:
                     'user': (item['user']['name']),
                     'date_created': item['date_created'],
                     'rating': item['rating'],
-                    'text': item['text']
+                    'text': item['text'],
+                    'website': short.tinyurl.short(self.link_to_review)
                 }
 
     def check_new_reviews(self):
@@ -97,22 +99,19 @@ class DoubleGisParser:
                 'reviews_count': review[0]['meta']['branch_reviews_count']
             }))
 
-            if count != review[0]['meta']['branch_reviews_count']:
+            if count.reviews_count == 0:
+                add_reviews_count('doublegis', ReviewsCount(**{
+                    'place_id': review[1],
+                    'reviews_count': review[0]['meta']['branch_reviews_count']
+                }))
+
+            elif count != review[0]['meta']['branch_reviews_count']:
                 update_reviews_count('doublegis', ReviewsCount(**{
                     'place_id': review[1],
                     'reviews_count': review[0]['meta']['branch_reviews_count']
                 }))
 
-                for collect_result in  self.collect_result(review[0]):
-                    yield collect_result
-
-
-
-if __name__ == '__main__':
-    # c = 0
-    # for i in DoubleGisParser().collect_result():
-    #     print(i)
-    #     c += 1
-    #
-    # print(c)
-    DoubleGisParser().check_new_reviews()
+            self.link_to_review = f'https://2gis.ru/ufa/search/вкусно%20и%20точка%20уфа/firm/{review[1]}/tab/reviews'
+            print(self.link_to_review)
+            for collect_result in self.collect_result(review[0]):
+                yield collect_result

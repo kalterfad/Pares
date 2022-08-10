@@ -1,12 +1,12 @@
 from pydantic import BaseModel
-from typing import List, Union
+from typing import Union
 
 
 class UserBase(BaseModel):
     id: int
-    username: str
-    is_active: bool
-    is_superuser: bool
+    username: str = ''
+    is_active: bool = False
+    is_superuser: bool = False
 
     class Config:
         orm_mode = True
@@ -18,6 +18,7 @@ class ReviewBase(BaseModel):
     date_created: str = ''
     rating: int = 0
     text: str = ''
+    website: str = ''
 
     class Config:
         orm_mode = True
@@ -33,9 +34,9 @@ class ReviewUserLinkBase(BaseModel):
 
 
 class ReviewsCount(BaseModel):
-    id: Union[int, None]
-    reviews_count: int
-    place_id: str
+    id: int = 0
+    reviews_count: int = 0
+    place_id: str = 0
 
     class Config:
         orm_mode = True
