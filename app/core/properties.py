@@ -1,6 +1,6 @@
 import telebot
 
-bot = telebot.TeleBot('5551940599:AAG6D5XJXMXleud8ZPe48LXVsVnTiPA8xOc')
+bot = telebot.TeleBot('TOKEN')
 
 
 # Настройки брокера для сельдерея
