@@ -16,7 +16,7 @@ kombu==5.2.4
 Mako==1.2.1
 MarkupSafe==2.1.1
 prompt-toolkit==3.0.30
-psycopg2==2.9.3
+psycopg2-binary    2.9.3
 pydantic==1.9.1
 pyshorteners==1.0.1
 pyTelegramBotAPI==4.6.1
