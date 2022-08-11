@@ -19,10 +19,10 @@ def update_reviews_from_double_gis():
 app.conf.beat_schedule = {
     'update_reviews_from_flamp': {
         'task': 'celery_conf.tasks.update_reviews_from_flamp',
-        'schedule': crontab(minute=50, hour=3),
+        'schedule': crontab(minute=10, hour=3),
     },
     'update_reviews_from_double_gis': {
             'task': 'celery_conf.tasks.update_reviews_from_double_gis',
-            'schedule': crontab(minute=50, hour=3),
+            'schedule': crontab(minute=10, hour=3),
     }
 }
