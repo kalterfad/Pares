@@ -3,4 +3,3 @@ todo.txt
 /.idea
 /__pycache__
 .env.prod.db
-docker-compose.yaml

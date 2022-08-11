@@ -1,0 +1,53 @@
+version: '3.7'
+
+services:
+  db:
+    image: postgres:12
+    environment:
+      POSTGRES_PASSWORD: 6512
+      POSTGRES_DB: postgres
+      POSTGRES_USER: postgres
+    volumes:
+      - pg_data:/var/lib/postgresql/data/
+
+  pares:
+    build: ./
+    restart: always
+    command: >
+      bash -c "export PYTHONPATH=/usr/src:/usr/src/app:usr/src/app && alembic upgrade head &&
+      python bot.py"
+    depends_on:
+      - db
+    volumes:
+      - .:/usr/src/app
+
+  redis:
+    image: redis
+    restart: always
+
+  celery_worker:
+    build: app/
+    restart: always
+    volumes:
+      - ./:/app
+    depends_on:
+      - redis
+      - pares
+    command: >
+      bash -c "export PYTHONPATH=/usr/src:/usr/src/app:usr/src/app &&
+            celery -A celery_conf worker -l INFO"
+
+  celery_beat:
+    build: app/
+    restart: always
+    volumes:
+      - ./:/app
+    depends_on:
+      - redis
+      - pares
+      - celery_worker
+    command: >
+      bash -c "export PYTHONPATH=/usr/src:/usr/src/app:usr/src/app &&
+            celery -A celery_conf beat -l INFO"
+volumes:
+  pg_data:
