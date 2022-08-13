@@ -13,7 +13,7 @@ REDIS_PASSWORD = '5MjXwTrA6Hy6JZSOv7XYkV1M6'
 REDIS_BROKER = 'redis://redis:6379/0'
 # REDIS_BACKEND = f'redis://:{REDIS_PASSWORD}@{REDIS_HOST}:{REDIS_PORT}/0'
 REDIS_BACKEND = 'redis://redis:6379/0'
-
+SQLALCHEMY_DATABASE_URL = "postgresql://postgres:6512@db:5432/postgres"
 # Ключ доступа к API
 FLAMP_API_KEY = 'Bearer 2b93f266f6a4df2bb7a196bb76dca60181ea3b37'
 

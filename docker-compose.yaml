@@ -1,5 +1,7 @@
 version: '3.7'
 
+volumes:
+  pg_data:
 services:
   db:
     image: postgres:12
@@ -14,40 +16,42 @@ services:
     build: ./
     restart: always
     command: >
-      bash -c "export PYTHONPATH=/usr/src:/usr/src/app:usr/src/app && alembic upgrade head &&
-      python bot.py"
+      bash -c "alembic upgrade head && python bot.py"
     depends_on:
       - db
     volumes:
       - .:/usr/src/app
 
   redis:
-    image: redis
+    image: 'bitnami/redis:latest'
     restart: always
+    environment:
+      - ALLOW_EMPTY_PASSWORD=yes
+
 
   celery_worker:
-    build: app/
+    build: ./
     restart: always
     volumes:
       - ./:/app
     depends_on:
-      - redis
       - pares
+      - redis
     command: >
-      bash -c "export PYTHONPATH=/usr/src:/usr/src/app:usr/src/app &&
-            celery -A celery_conf worker -l INFO"
+      bash -c "celery -A celery_conf worker -l INFO"
+    links:
+      - redis
 
   celery_beat:
-    build: app/
+    build: ./
     restart: always
     volumes:
       - ./:/app
     depends_on:
-      - redis
       - pares
+      - redis
       - celery_worker
     command: >
-      bash -c "export PYTHONPATH=/usr/src:/usr/src/app:usr/src/app &&
-            celery -A celery_conf beat -l INFO"
-volumes:
-  pg_data:
+      bash -c "celery -A celery_conf beat -l INFO"
+    links:
+      - redis

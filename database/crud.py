@@ -1,8 +1,8 @@
 from sqlalchemy.orm import Session
 
-from app.core.database import test
-from app.database.models import User, Reviews, ReviewUserLinks, FlampReviewCount, DoubleGisReviewCount
-from app.database.schemas import UserBase, ReviewBase, ReviewUserLinkBase, ReviewsCount
+from core.database import test
+from database.models import User, Reviews, ReviewUserLinks, FlampReviewCount, DoubleGisReviewCount
+from database.schemas import UserBase, ReviewBase, ReviewUserLinkBase, ReviewsCount
 
 
 def get_all_users(db: Session = test()):
@@ -14,7 +14,6 @@ def get_all_users(db: Session = test()):
 
 
 def get_user_data(user: UserBase, db: Session = test()) -> UserBase:
-
     user_data = db.query(User).filter(User.id == user.id).first()
     if user_data is None:
         new_user = User(
@@ -53,7 +52,6 @@ def create_user(user: UserBase, db: Session = test()):
 
 
 def get_review(review_id: int, db: Session = test()):
-
     review = db.query(Reviews).filter(Reviews.id == review_id).first()
     if review is None:
         return ReviewBase()
@@ -77,9 +75,6 @@ def add_new_review(review: ReviewBase, db: Session = test()):
     return new_review
 
 
-
-
-
 def get_review_link(link_id: str, db: Session = test()) -> ReviewUserLinkBase:
     return ReviewUserLinkBase(**db.query(ReviewUserLinkBase).filter(ReviewUserLinks.id == link_id).first().__dict__)
 
@@ -98,7 +93,6 @@ def create_new_review_link(review_link: ReviewUserLinkBase, db: Session = test()
 
 
 def get_reviews_count(model: str, place: ReviewsCount, db: Session = test()):
-
     db_model = {
         'flamp': FlampReviewCount,
         'doublegis': DoubleGisReviewCount
@@ -110,6 +104,7 @@ def get_reviews_count(model: str, place: ReviewsCount, db: Session = test()):
         return ReviewsCount()
     else:
         return reviews_count
+
 
 def add_reviews_count(model: str, place: ReviewsCount, db: Session = test()):
     db_model = {
@@ -147,7 +142,7 @@ def update_reviews_count(model: str, update_place: ReviewsCount, db: Session = t
         return new_place
 
     else:
-        db.query(db_model[model]).filter(db_model[model].place_id==update_place.place_id).update(
+        db.query(db_model[model]).filter(db_model[model].place_id == update_place.place_id).update(
             {'reviews_count': update_place.reviews_count})
 
         db.commit()
@@ -159,7 +154,6 @@ def delete_review(db: Session = test()):
     query = 'DELETE FROM flamp_review_count'
     db.execute(query)
     db.commit()
-
 
 # if __name__ == '__main__':
 #     delete_review()

@@ -1,17 +1,16 @@
 import re
 
-from app.bot_process import create_new_user
-from app.core.properties import bot
-from app.database.crud import update_user_data
-from app.face_control import Controller as control
-from app.keyboard import Keyboard
-from app.database.schemas import UserBase
+from bot_process.bot_process import create_new_user
+from bot_process.face_control import Controller as control
+from bot_process.keyboard import Keyboard
+from core.properties import bot
+from database.crud import update_user_data
+from database.schemas import UserBase
 
 
 @bot.message_handler(commands=['start'])
 @control('ban')
 def send_welcome(message):
-
     bot.send_message(message.chat.id,
                      'Привет, {0.first_name}.\n\n'
                      'Заявка на верификацию направлена администратору.'.
@@ -52,7 +51,7 @@ def issue_rights(call):
     # Действие, на которое нажал админ, ниже через него достаются следующие данные:
     # Активировать | Деактивировать, Дать права админа |  Отозвать права админа
     selected_action = call.json["message"]["reply_markup"]["inline_keyboard"][0]
-    # Словарь содержатся возможные действия над пользователем
+    # В соваре содержатся возможные действия над пользователем
     action_dict = {
         'Активировать': ['Деактивировать', 'Пользователь активирован', True],
         'Деактивировать': ['Активировать', 'Пользователь деактивирован', False],
@@ -93,9 +92,6 @@ def issue_rights(call):
     elif action == 'is_superuser' and not action_dict[right_dict[action]['action']][2]:
         bot.ban_chat_member(-1001751207146, chat_id)
 
-@bot.message_handler(content_types=['text'])
-def test(message):
-    print(message.chat.id)
 
 if __name__ == '__main__':
     bot.polling(none_stop=True)

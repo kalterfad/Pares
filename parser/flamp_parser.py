@@ -1,9 +1,9 @@
 import pyshorteners
 import requests
 
-from app.core.properties import FLAMP_API_KEY
-from app.database.crud import get_reviews_count, update_reviews_count, get_review, add_reviews_count
-from app.database.schemas import ReviewsCount
+from core.properties import FLAMP_API_KEY
+from database.crud import get_reviews_count, update_reviews_count, get_review, add_reviews_count
+from database.schemas import ReviewsCount
 
 
 class FlampParser:

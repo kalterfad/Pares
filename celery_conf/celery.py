@@ -1,6 +1,6 @@
-from app.core.properties import REDIS_BROKER, REDIS_BACKEND
-
 from celery import Celery
+
+from core.properties import REDIS_BROKER, REDIS_BACKEND
 
 app = Celery(
     'celery_conf',
